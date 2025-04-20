@@ -10,7 +10,7 @@ Create a simple store with a REST API server.
 
 ✅ 3.5 Store data in a database on the server side | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/14fee72451c8d5bf6a3bb082625a63a5012346ed)
 
-❌ 4.0 Use Axios for making calls
+✅ 4.0 Use Axios for making calls | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/d49781c01c7b9e5307a18df5432d67666b3ab153)
 
 ❌ 4.5 Use React Hooks for cart and payment option
 

@@ -9,8 +9,7 @@ export async function getCategory(id: string): Promise<Category> {
 }
 
 export async function getProductsByCategory(categoryId: string): Promise<Product[]> {
-  const res = await fetch(`${apiUrl}/products`)
+  const res = await fetch(`${apiUrl}/products/category/${categoryId}`)
   if (!res.ok) throw new Error('Failed to fetch products')
-  const products: Product[] = await res.json()
-  return products.filter((product) => product.categoryId === Number(categoryId))
+  return res.json()
 }

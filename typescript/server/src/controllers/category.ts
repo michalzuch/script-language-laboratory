@@ -1,49 +1,37 @@
-import { categories } from '../db'
+import { create, getAll, getById, remove, update } from '../database'
 import { Category } from '../types/category'
 
 export const categoryController = {
-  get(id: number): Category {
-    const category = categories.find((category) => category.id === id)
-    if (!category) throw new Error(`Category with id ${id} not found`)
-    return category
+  async get(id: number): Promise<Category> {
+    try {
+      const category = await getById('categories', id)
+      return category
+    } catch (error) {
+      throw new Error(`Category with id ${id} not found: ${error}`)
+    }
   },
 
-  getAll(): Category[] {
-    return [...categories]
+  async getAll(): Promise<Category[]> {
+    try {
+      const categories = await getAll('categories')
+      return categories
+    } catch (error) {
+      throw new Error(`Error getting all categories: ${error}`)
+    }
   },
 
-  create(category: Omit<Category, 'id'>): Category {
-    const id = categories.length + 1
-    const newCategory = {
-      ...category,
-      id: id,
-    }
-    categories.push({ ...newCategory })
-    return { ...newCategory }
+  async create(category: Omit<Category, 'id'>): Promise<Category> {
+    const newCategory = await create('categories', category)
+    return newCategory
   },
 
-  update(id: number, category: Partial<Category>): Category {
-    const index = categories.findIndex((c) => c.id === id)
-    if (index === -1) {
-      throw new Error(`Category with id ${id} not found`)
-    }
-
-    const updatedCategory = {
-      ...categories[index],
-      ...category,
-      id,
-    }
-
-    categories[index] = updatedCategory
-    return { ...updatedCategory }
+  async update(id: number, category: Partial<Category>): Promise<Category> {
+    const updatedCategory = await update('categories', id, category)
+    return updatedCategory
   },
 
-  delete(id: number): Category {
-    const index = categories.findIndex((category) => category.id === id)
-    if (index === -1) {
-      throw new Error(`Category with id ${id} not found`)
-    }
-
-    return categories.splice(index, 1)[0]
+  async delete(id: number): Promise<Category> {
+    const deletedCategory = await remove('categories', id)
+    return deletedCategory
   },
 }

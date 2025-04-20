@@ -1,49 +1,35 @@
-import { products } from '../db'
+import { create, getAll, getByCategoryId, getById, remove, update } from '../database'
 import { Product } from '../types/product'
 
 export const productController = {
-  get(id: number): Product {
-    const product = products.find((product) => product.id === id)
+  async get(id: number): Promise<Product> {
+    const product = await getById('products', id)
     if (!product) throw new Error(`Product with id ${id} not found`)
     return product
   },
 
-  getAll(): Product[] {
-    return [...products]
+  async getAll(): Promise<Product[]> {
+    const products = await getAll('products')
+    return products
   },
 
-  create(product: Omit<Product, 'id'>): Product {
-    const id = products.length + 1
-    const newProduct = {
-      ...product,
-      id: id,
-    }
-    products.push({ ...newProduct })
-    return { ...newProduct }
+  async create(product: Omit<Product, 'id'>): Promise<Product> {
+    const newProduct = await create('products', product)
+    return newProduct
   },
 
-  update(id: number, product: Partial<Product>): Product {
-    const index = products.findIndex((p) => p.id === id)
-    if (index === -1) {
-      throw new Error(`Product with id ${id} not found`)
-    }
-
-    const updatedProduct = {
-      ...products[index],
-      ...product,
-      id,
-    }
-
-    products[index] = updatedProduct
-    return { ...updatedProduct }
+  async update(id: number, product: Partial<Product>): Promise<Product> {
+    const updatedProduct = await update('products', id, product)
+    return updatedProduct
   },
 
-  delete(id: number): Product {
-    const index = products.findIndex((p) => p.id === id)
-    if (index === -1) {
-      throw new Error(`Product with id ${id} not found`)
-    }
+  async delete(id: number): Promise<Product> {
+    const deletedProduct = await remove('products', id)
+    return deletedProduct
+  },
 
-    return products.splice(index, 1)[0]
+  async getByCategory(categoryId: number): Promise<Product[]> {
+    const products = await getByCategoryId('products', categoryId)
+    return products
   },
 }

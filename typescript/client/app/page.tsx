@@ -1,10 +1,14 @@
+import api from '@/helpers/api'
 import { iconMap } from '@/helpers/iconMapper'
-import { useCategories } from '@/hooks/useCategories'
+import { Category } from '@/types/category'
 import { StackIcon } from '@radix-ui/react-icons'
 import Link from 'next/link'
 
 export default async function Home() {
-  const categories = await useCategories()
+  const { data }: { data: Category[] } = await api.get('/categories').catch((error) => {
+    console.error(error)
+    return { data: [] }
+  })
 
   return (
     <div className='min-h-screen p-4 md:p-8'>
@@ -15,7 +19,7 @@ export default async function Home() {
             Categories
           </h2>
           <ul className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3'>
-            {categories.map((category) => (
+            {data.map((category) => (
               <li key={category.id}>
                 <Link
                   href={`/category/${category.id}`}

@@ -15,3 +15,5 @@ Create a simple store with a REST API server.
 ✅ 4.5 Use React Hooks for cart and payment option | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/d6e5ce692e4088c09df546181ee7e50907d308a9)
 
 ✅ 5.0 Add CORS configuration on the server side and configure it on the client side | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/7592344fe5a1fe155db576919973de654ab5354e)
+
+https://github.com/user-attachments/assets/bb87724e-96b1-4889-9957-6ed4472c7e94

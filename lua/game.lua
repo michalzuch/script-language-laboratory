@@ -1,3 +1,4 @@
+local Save = require "save"
 local config = require "config"
 local Block = require "block"
 local Grid = require "grid"
@@ -12,6 +13,8 @@ function Game.new()
     self.dropTimer = 0
     self.dropInterval = 0.5
     self.gameOver = false
+    self.notification = nil
+    self.notificationTimer = 0
     return self
 end
 
@@ -24,6 +27,7 @@ end
 
 function Game:update(dt)
     if self.gameOver then
+        self:updateNotification(dt)
         return
     end
     self.dropTimer = self.dropTimer + dt
@@ -37,6 +41,7 @@ function Game:update(dt)
             self:spawnBlock()
         end
     end
+    self:updateNotification(dt)
 end
 
 function Game:keypressed(key)
@@ -97,10 +102,84 @@ function Game:draw()
     for x = 0, config.gridWidth do
         love.graphics.line(x * cellSize, 0, x * cellSize, config.gridHeight * cellSize)
     end
+    if self.notification then
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle("fill", 0, 0, config.gridWidth * cellSize, 40)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf(self.notification, 0, 10, config.gridWidth * cellSize, "center")
+    end
     if self.gameOver then
         love.graphics.setColor(1, 0, 0)
         love.graphics.printf("GAME OVER\nPress Enter to Restart", 0, config.gridHeight * cellSize / 2 - 30,
             config.gridWidth * cellSize, "center")
+    end
+end
+
+function Game:serialize()
+    local gridCopy = {}
+    for y = 1, config.gridHeight do
+        gridCopy[y] = {}
+        for x = 1, config.gridWidth do
+            gridCopy[y][x] = self.grid.cells[y][x]
+        end
+    end
+    local block = self.currentBlock
+    return {
+        grid = gridCopy,
+        currentBlock = {
+            type = block.type,
+            rotation = block.rotation,
+            pos = {
+                x = block.pos.x,
+                y = block.pos.y
+            }
+        },
+        dropTimer = self.dropTimer,
+        gameOver = self.gameOver
+    }
+end
+
+function Game:deserialize(data)
+    for y = 1, config.gridHeight do
+        for x = 1, config.gridWidth do
+            self.grid.cells[y][x] = data.grid[y][x]
+        end
+    end
+    self.currentBlock = Block.new(data.currentBlock.type)
+    self.currentBlock:setRotation(data.currentBlock.rotation)
+    self.currentBlock.pos.x = data.currentBlock.pos.x
+    self.currentBlock.pos.y = data.currentBlock.pos.y
+    self.dropTimer = data.dropTimer or 0
+    self.gameOver = data.gameOver or false
+end
+
+function Game:save()
+    Save.save(self:serialize())
+    self:showNotification("Game Saved!", 1.5)
+end
+
+function Game:load()
+    local data = Save.load()
+    if data then
+        self:deserialize(data)
+        self:showNotification("Game Loaded!", 1.5)
+    else
+        self:showNotification("No Save Found!", 1.5)
+    end
+end
+
+function Game:showNotification(msg, duration)
+    self.notification = msg
+    self.notificationTimer = duration or 2
+end
+
+function Game:updateNotification(dt)
+    if self.notification then
+        self.notificationTimer = self.notificationTimer - dt
+        if self.notificationTimer <= 0 then
+            self.notification = nil
+            self.notificationTimer = 0
+        end
     end
 end
 

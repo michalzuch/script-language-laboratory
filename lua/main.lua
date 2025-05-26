@@ -14,7 +14,13 @@ function love.update(dt)
 end
 
 function love.keypressed(key)
-    game:keypressed(key)
+    if key == "s" then
+        game:save()
+    elseif key == "l" then
+        game:load()
+    else
+        game:keypressed(key)
+    end
 end
 
 function love.draw()

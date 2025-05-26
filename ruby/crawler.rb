@@ -3,8 +3,9 @@
 require "nokogiri"
 require "open-uri"
 require "json"
+require "cgi"
 
-Product = Struct.new(:title, :price) do
+Product = Struct.new(:title, :price, :asin, :dimensions) do
   def to_json(*options)
     to_h.to_json(*options)
   end
@@ -29,7 +30,8 @@ class AmazonScraper
   private
 
   def fetch_search_results
-    search_url = "#{AMAZON_URL}/s?k=#{@keywords}"
+    encoded_keywords = CGI.escape(@keywords)
+    search_url = "#{AMAZON_URL}/s?k=#{encoded_keywords}"
     headers = { 'User-Agent' => USER_AGENT }
     Nokogiri::HTML(URI.open(search_url, headers))
   rescue OpenURI::HTTPError => e
@@ -54,18 +56,59 @@ class AmazonScraper
     page.css(".s-result-item").each do |item|
       break if products.length >= MAX_PRODUCTS
       next unless item.is_a?(Nokogiri::XML::Element)
-      
+      asin = item['data-asin']
+      next if asin.nil? || asin.strip.empty?
+
       title_element = item.at_css("h2")
       price_element = item.at_css(".a-price .a-offscreen")
-      
+
       if title_element && price_element
+        dimensions = scrape_dimensions(asin)
         products << Product.new(
           title_element.text.strip,
-          price_element.text.strip
+          price_element.text.strip,
+          asin,
+          dimensions
         )
+        sleep(rand(0.5..1.2))
       end
     end
     products
+  end
+
+  def scrape_dimensions(asin)
+    url = "#{AMAZON_URL}/dp/#{asin}"
+    headers = { 'User-Agent' => USER_AGENT }
+    begin
+      doc = Nokogiri::HTML(URI.open(url, headers))
+    rescue OpenURI::HTTPError => e
+      puts "Error loading product page for ASIN #{asin}: #{e.message}"
+      return nil
+    end
+
+    dimension = nil
+
+    doc.css('#productDetails_techSpec_section_1 tr').each do |row|
+      key = row.at_css('th')&.text&.strip
+      value = row.at_css('td')&.text&.strip
+      if key&.downcase&.include?('wymiary') || key&.downcase&.include?('dimensions')
+        dimension = value
+        break
+      end
+    end
+
+    if dimension.nil?
+      doc.css('#prodDetails tr').each do |row|
+        key = row.at_css('td.label')&.text&.strip
+        value = row.at_css('td.value')&.text&.strip
+        if key&.downcase&.include?('wymiary') || key&.downcase&.include?('dimensions')
+          dimension = value
+          break
+        end
+      end
+    end
+
+    dimension
   end
 end
 

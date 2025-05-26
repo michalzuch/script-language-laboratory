@@ -9,6 +9,9 @@ GEM
     nokogiri (1.18.8-aarch64-linux-gnu)
       racc (~> 1.4)
     racc (1.8.1)
+    sqlite3 (2.6.0)
+      mini_portile2 (~> 2.8.0)
+    sqlite3 (2.6.0-aarch64-linux-gnu)
 
 PLATFORMS
   aarch64-linux
@@ -17,6 +20,7 @@ PLATFORMS
 DEPENDENCIES
   json
   nokogiri
+  sqlite3
 
 BUNDLED WITH
    2.5.22

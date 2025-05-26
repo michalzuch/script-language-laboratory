@@ -4,6 +4,7 @@ require "nokogiri"
 require "open-uri"
 require "json"
 require "cgi"
+require "sqlite3"
 
 Product = Struct.new(:title, :price, :asin, :dimensions, :url) do
   def to_json(*options)
@@ -114,6 +115,33 @@ class AmazonScraper
   end
 end
 
+def save_products_to_sqlite(products, db_path = "products.db")
+  db = SQLite3::Database.new(db_path)
+  db.execute <<-SQL
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      price TEXT,
+      asin TEXT UNIQUE,
+      dimensions TEXT,
+      url TEXT
+    );
+  SQL
+
+  products.each do |product|
+    begin
+      db.execute(
+        "INSERT OR IGNORE INTO products (title, price, asin, dimensions, url) VALUES (?, ?, ?, ?, ?)",
+        [product.title, product.price, product.asin, product.dimensions, product.url]
+      )
+    rescue SQLite3::Exception => e
+      puts "DB error: #{e.message}"
+    end
+  end
+
+  db.close
+end
+
 if ARGV.empty?
   puts "Usage: ruby crawler.rb <keyword>"
   exit
@@ -124,3 +152,6 @@ scraper = AmazonScraper.new(formatted_keywords)
 products = scraper.scrape
 
 puts JSON.pretty_generate(products)
+
+save_products_to_sqlite(products)
+puts "Saved #{products.size} products to SQLite database."

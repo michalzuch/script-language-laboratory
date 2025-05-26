@@ -5,7 +5,7 @@ require "open-uri"
 require "json"
 require "cgi"
 
-Product = Struct.new(:title, :price, :asin, :dimensions) do
+Product = Struct.new(:title, :price, :asin, :dimensions, :url) do
   def to_json(*options)
     to_h.to_json(*options)
   end
@@ -64,11 +64,13 @@ class AmazonScraper
 
       if title_element && price_element
         dimensions = scrape_dimensions(asin)
+        url = "#{AMAZON_URL}/dp/#{asin}"
         products << Product.new(
           title_element.text.strip,
           price_element.text.strip,
           asin,
-          dimensions
+          dimensions,
+          url
         )
         sleep(rand(0.5..1.2))
       end

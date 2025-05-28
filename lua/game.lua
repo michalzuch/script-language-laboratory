@@ -57,7 +57,7 @@ function Game:clearLinesAnimated()
         for yy = y, 2, -1 do
             self.grid.cells[yy] = {}
             for x = 1, config.gridWidth do
-                self.grid.cells[yy][x] = self.grid.cells[yy-1][x]
+                self.grid.cells[yy][x] = self.grid.cells[yy - 1][x]
             end
         end
         self.grid.cells[1] = {}
@@ -108,7 +108,9 @@ function Game:update(dt)
 end
 
 function Game:keypressed(key)
-    if self.clearingLines then return end
+    if self.clearingLines then
+        return
+    end
 
     if self.gameOver then
         if key == "return" then
@@ -150,6 +152,23 @@ function Game:keypressed(key)
             self:spawnBlock()
         end
     end
+end
+
+function Game:handleTouch(x, y)
+    local width, height = love.graphics.getWidth(), love.graphics.getHeight()
+    if x < width / 3 then
+        self:keypressed("left")
+    elseif x > width * 2 / 3 then
+        self:keypressed("right")
+    elseif y < height / 2 then
+        self:keypressed("up")
+    else
+        self:keypressed("down")
+    end
+end
+
+function Game:handleSwipeDown()
+    self:keypressed("space")
 end
 
 function Game:draw()

@@ -16,6 +16,9 @@ function Game.new(sounds)
     self.notification = nil
     self.notificationTimer = 0
     self.sounds = sounds or {}
+    self.clearingLines = nil
+    self.clearAnimTimer = 0
+    self.clearAnimDuration = 0.3
     return self
 end
 
@@ -29,11 +32,55 @@ function Game:spawnBlock()
     end
 end
 
+function Game:findFullLines()
+    local full = {}
+    for y = 1, config.gridHeight do
+        local isFull = true
+        for x = 1, config.gridWidth do
+            if not self.grid.cells[y][x] then
+                isFull = false
+                break
+            end
+        end
+        if isFull then
+            table.insert(full, y)
+        end
+    end
+    return full
+end
+
+function Game:clearLinesAnimated()
+    local lines = self.clearingLines
+    table.sort(lines)
+    for i = #lines, 1, -1 do
+        local y = lines[i]
+        for yy = y, 2, -1 do
+            self.grid.cells[yy] = {}
+            for x = 1, config.gridWidth do
+                self.grid.cells[yy][x] = self.grid.cells[yy-1][x]
+            end
+        end
+        self.grid.cells[1] = {}
+    end
+    self.clearingLines = nil
+    self:spawnBlock()
+end
+
 function Game:update(dt)
     if self.gameOver then
         self:updateNotification(dt)
         return
     end
+
+    if self.clearingLines then
+        self.clearAnimTimer = self.clearAnimTimer - dt
+        if self.clearAnimTimer <= 0 then
+            self:clearLinesAnimated()
+        end
+        self:updateNotification(dt)
+        return
+    end
+
     self.dropTimer = self.dropTimer + dt
     if self.dropTimer >= self.dropInterval then
         self.dropTimer = 0
@@ -45,18 +92,24 @@ function Game:update(dt)
                 self.sounds.lock:play()
             end
 
-            local linesCleared = self.grid:clearLines()
-            if linesCleared > 0 and self.sounds.clear then
-                self.sounds.clear:play()
+            local fullLines = self:findFullLines()
+            if #fullLines > 0 then
+                self.clearingLines = fullLines
+                self.clearAnimTimer = self.clearAnimDuration
+                if self.sounds.clear then
+                    self.sounds.clear:play()
+                end
+            else
+                self:spawnBlock()
             end
-
-            self:spawnBlock()
         end
     end
     self:updateNotification(dt)
 end
 
 function Game:keypressed(key)
+    if self.clearingLines then return end
+
     if self.gameOver then
         if key == "return" then
             self.grid:reset()
@@ -86,12 +139,16 @@ function Game:keypressed(key)
             self.sounds.lock:play()
         end
 
-        local linesCleared = self.grid:clearLines()
-        if linesCleared > 0 and self.sounds.clear then
-            self.sounds.clear:play()
+        local fullLines = self:findFullLines()
+        if #fullLines > 0 then
+            self.clearingLines = fullLines
+            self.clearAnimTimer = self.clearAnimDuration
+            if self.sounds.clear then
+                self.sounds.clear:play()
+            end
+        else
+            self:spawnBlock()
         end
-
-        self:spawnBlock()
     end
 end
 
@@ -100,7 +157,21 @@ function Game:draw()
     for y = 1, config.gridHeight do
         for x = 1, config.gridWidth do
             if self.grid.cells[y][x] then
-                love.graphics.setColor(config.blockColors[self.grid.cells[y][x]])
+                local blockType = self.grid.cells[y][x]
+                local flash = false
+                if self.clearingLines then
+                    for _, line in ipairs(self.clearingLines) do
+                        if y == line then
+                            flash = true
+                            break
+                        end
+                    end
+                end
+                if flash then
+                    love.graphics.setColor(1, 1, 1)
+                else
+                    love.graphics.setColor(config.blockColors[blockType])
+                end
                 love.graphics.rectangle("fill", (x - 1) * cellSize, (y - 1) * cellSize, cellSize - 1, cellSize - 1)
             end
         end

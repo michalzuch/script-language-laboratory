@@ -6,7 +6,7 @@ local Grid = require "grid"
 local Game = {}
 Game.__index = Game
 
-function Game.new()
+function Game.new(sounds)
     local self = setmetatable({}, Game)
     self.grid = Grid.new()
     self.currentBlock = Block.new()
@@ -15,6 +15,7 @@ function Game.new()
     self.gameOver = false
     self.notification = nil
     self.notificationTimer = 0
+    self.sounds = sounds or {}
     return self
 end
 
@@ -22,6 +23,9 @@ function Game:spawnBlock()
     self.currentBlock = Block.new()
     if not self.grid:canMove(self.currentBlock, 0, 0) then
         self.gameOver = true
+        if self.sounds.gameover then
+            self.sounds.gameover:play()
+        end
     end
 end
 
@@ -37,7 +41,15 @@ function Game:update(dt)
             self.currentBlock.pos.y = self.currentBlock.pos.y + 1
         else
             self.grid:lockBlock(self.currentBlock)
-            self.grid:clearLines()
+            if self.sounds.lock then
+                self.sounds.lock:play()
+            end
+
+            local linesCleared = self.grid:clearLines()
+            if linesCleared > 0 and self.sounds.clear then
+                self.sounds.clear:play()
+            end
+
             self:spawnBlock()
         end
     end
@@ -70,7 +82,15 @@ function Game:keypressed(key)
             block.pos.y = block.pos.y + 1
         end
         self.grid:lockBlock(block)
-        self.grid:clearLines()
+        if self.sounds.lock then
+            self.sounds.lock:play()
+        end
+
+        local linesCleared = self.grid:clearLines()
+        if linesCleared > 0 and self.sounds.clear then
+            self.sounds.clear:play()
+        end
+
         self:spawnBlock()
     end
 end

@@ -1,0 +1,26 @@
+[project]
+name = 'restaurant-chatbot'
+version = '0.1.0'
+description = 'A Slack bot for a restaurant powered by LLM.'
+requires-python = '>=3.11,<3.12'
+dependencies = [
+  'langchain',
+  'langchain_ollama',
+  'python-dotenv',
+  'slack-bolt',
+  'ruff',
+  'uv',
+]
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = 'py311'
+lint.select = ['E4', 'E7', 'E9', 'F']
+lint.fixable = ['ALL']
+
+[tool.ruff.format]
+quote-style = 'single'
+indent-style = 'space'
+skip-magic-trailing-comma = false
+line-ending = 'auto'

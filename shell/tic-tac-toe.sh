@@ -3,6 +3,7 @@
 EMPTY=" "
 PLAYER_X="X"
 PLAYER_O="O"
+SAVE_FILE="tictactoe.save"
 
 board=("$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY")
 current_player=$PLAYER_X
@@ -53,12 +54,39 @@ is_draw() {
     [[ $move_count -ge 9 ]]
 }
 
+save_game() {
+    (IFS=,; echo "${board[*]}") > "$SAVE_FILE"
+    echo "$current_player" >> "$SAVE_FILE"
+    echo "$move_count" >> "$SAVE_FILE"
+    echo "Game saved to $SAVE_FILE."
+    sleep 1
+}
+
+load_game() {
+    if [[ ! -f $SAVE_FILE ]]; then
+        echo "No saved game found."
+        sleep 1
+        return 1
+    fi
+    IFS=, read -r -a board < <(head -n 1 "$SAVE_FILE")
+    current_player=$(sed -n 2p "$SAVE_FILE")
+    move_count=$(sed -n 3p "$SAVE_FILE")
+    echo "Game loaded from $SAVE_FILE."
+    sleep 1
+    return 0
+}
+
 prompt_move() {
     local pos
     while true; do
-        read -p "Player $current_player, enter your move (1-9): " pos
+        read -p "Player $current_player, enter your move (1-9 or 'save'): " pos
+        if [[ "$pos" == "save" ]]; then
+            save_game
+            draw_board
+            continue
+        fi
         if [[ ! $pos =~ ^[1-9]$ ]]; then
-            echo "Invalid input. Enter a number 1-9."
+            echo "Invalid input. Enter a number 1-9 or 'save'."
             continue
         fi
         ((pos--))
@@ -71,6 +99,16 @@ prompt_move() {
         break
     done
 }
+
+clear
+echo "Tic Tac Toe"
+echo
+if [[ -f $SAVE_FILE ]]; then
+    read -p "Load saved game? (y/n): " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        load_game
+    fi
+fi
 
 while true; do
     draw_board

@@ -2,6 +2,20 @@
 
 Projects built during Script Language Laboratory classes at Jagiellonian University
 
+## [Shell](https://github.com/michalzuch/script-language-laboratory/tree/main/shell)
+
+Create a Tic Tac Toe game in Bash.
+
+✅ 3.0 Turn-based mode | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/e2a3c6ffdda70aefedc6fc9e3228edea8574190c)
+
+✅ 4.0 Save and load game | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/df0ee1a28a291bc76e566c99433d7b66ce5143e9)
+
+✅ 5.0 Play against a computer | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/f0a481b5e6f5ace9190992f3ca639689dca8db88)
+
+https://github.com/user-attachments/assets/2f93375e-e839-438b-adff-7e599247d4f4
+
+---
+
 ## [TypeScript](https://github.com/michalzuch/script-language-laboratory/tree/main/typescript)
 
 Create a simple store with a REST API server.
@@ -53,3 +67,21 @@ Create a Tetris game in Lua using the [Löve framework](https://love2d.org/)
 ✅ 5.0 iOS or Android version with touch implementation | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/516d0672d4af6a9c745b28029fa3eaa671308996)
 
 https://github.com/user-attachments/assets/e86f3c86-5964-4b47-ade8-206e38a739af
+
+---
+
+## [Python](https://github.com/michalzuch/script-language-laboratory/tree/main/python)
+
+Create a chatbot integrated with one platform: Slack, Discord, or Messenger - that utilizes LLMs with [Ollama](https://ollama.com/) or [Rasa](https://rasa.com).
+
+✅ 3.0 Implement at least 3 stories - detect intent | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/57e145c0f5eb5ad62e517bb65bedb859d1ebc263)
+
+✅ 3.5 Opening hours information should be retrieved from a file | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/c512c2f4b6fdd2630197f84291f9da384ec38bfe)
+
+✅ 4.0 Display menu from a file | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/2b489116ab720d1a331348f80d11e7d15caaf6bb)
+
+✅ 4.5 Collect an order and summarize it | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/4c4d8424960b34426c3f1aee9e1774a3feab682d)
+
+✅ 5.0 Collect delivery address | [Commit](https://github.com/michalzuch/script-language-laboratory/commit/afa2857d15249df411122c5fdad0aa70e4c2d26b)
+
+https://github.com/user-attachments/assets/a7d5d021-2f07-4fc3-b19b-bf4bf5e225fd

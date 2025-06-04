@@ -1,10 +1,9 @@
 from dotenv import load_dotenv
+from model import get_restaurant_chain
+from tools import get_opening_hours, get_menu
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 import os
-
-from model import get_restaurant_chain
-from tools import get_opening_hours
 
 load_dotenv()
 
@@ -29,12 +28,28 @@ def is_opening_hours_question(text):
     return any(kw in text.lower() for kw in keywords)
 
 
+def is_menu_question(text):
+    keywords = [
+        'menu',
+        'what do you serve',
+        'what can I order',
+        'dania',
+        'karta dań',
+        'co mogę zamówić',
+        'pokaż menu',
+    ]
+    return any(kw in text.lower() for kw in keywords)
+
+
 @app.event('message')
 def handle_message_events(body, say):
     user_input = body.get('event', {}).get('text', '')
     if user_input:
         if is_opening_hours_question(user_input):
             response = get_opening_hours()
+            say(response)
+        elif is_menu_question(user_input):
+            response = get_menu()
             say(response)
         else:
             response = chain.invoke({'input': user_input})

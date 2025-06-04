@@ -1,0 +1,14 @@
+{
+  "Starters": [
+    { "name": "Bruschetta", "price": "18 PLN" },
+    { "name": "Garlic Bread", "price": "12 PLN" }
+  ],
+  "Main Courses": [
+    { "name": "Margherita Pizza", "price": "32 PLN" },
+    { "name": "Spaghetti Carbonara", "price": "36 PLN" }
+  ],
+  "Desserts": [
+    { "name": "Tiramisu", "price": "20 PLN" },
+    { "name": "Panna Cotta", "price": "18 PLN" }
+  ]
+}

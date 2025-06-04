@@ -8,6 +8,7 @@ SAVE_FILE="tictactoe.save"
 board=("$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY" "$EMPTY")
 current_player=$PLAYER_X
 move_count=0
+vs_computer=0
 
 draw_board() {
     clear
@@ -58,6 +59,7 @@ save_game() {
     (IFS=,; echo "${board[*]}") > "$SAVE_FILE"
     echo "$current_player" >> "$SAVE_FILE"
     echo "$move_count" >> "$SAVE_FILE"
+    echo "$vs_computer" >> "$SAVE_FILE"
     echo "Game saved to $SAVE_FILE."
     sleep 1
 }
@@ -71,6 +73,7 @@ load_game() {
     IFS=, read -r -a board < <(head -n 1 "$SAVE_FILE")
     current_player=$(sed -n 2p "$SAVE_FILE")
     move_count=$(sed -n 3p "$SAVE_FILE")
+    vs_computer=$(sed -n 4p "$SAVE_FILE")
     echo "Game loaded from $SAVE_FILE."
     sleep 1
     return 0
@@ -100,6 +103,22 @@ prompt_move() {
     done
 }
 
+computer_move() {
+    local empty_indices=()
+    for i in "${!board[@]}"; do
+        if [[ ${board[$i]} == "$EMPTY" ]]; then
+            empty_indices+=($i)
+        fi
+    done
+    if [[ ${#empty_indices[@]} -gt 0 ]]; then
+        local r=$(( RANDOM % ${#empty_indices[@]} ))
+        local pos=${empty_indices[$r]}
+        board[$pos]=$PLAYER_O
+        ((move_count++))
+        sleep 0.5
+    fi
+}
+
 clear
 echo "Tic Tac Toe"
 echo
@@ -110,13 +129,32 @@ if [[ -f $SAVE_FILE ]]; then
     fi
 fi
 
+if [[ $move_count -eq 0 ]]; then
+    echo "Select game mode:"
+    echo "1. Two players"
+    echo "2. Play against computer"
+    read -p "Enter 1 or 2: " mode
+    if [[ "$mode" == "2" ]]; then
+        vs_computer=1
+    fi
+fi
+
 while true; do
     draw_board
-    prompt_move
+    if [[ $vs_computer -eq 1 && $current_player == $PLAYER_O ]]; then
+        echo "Computer (O) is making a move..."
+        computer_move
+    else
+        prompt_move
+    fi
 
     if is_winner $current_player; then
         draw_board
-        echo "Player $current_player wins!"
+        if [[ $vs_computer -eq 1 && $current_player == $PLAYER_O ]]; then
+            echo "Computer (O) wins!"
+        else
+            echo "Player $current_player wins!"
+        fi
         break
     elif is_draw; then
         draw_board

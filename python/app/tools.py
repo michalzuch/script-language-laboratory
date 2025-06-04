@@ -26,3 +26,32 @@ def get_menu(_=None):
         return '\n'.join(output)
     except Exception:
         return "Sorry, I'm unable to retrieve the menu right now."
+
+
+def load_menu_items():
+    """Returns a dict: {item_name: price_float}"""
+    with open('data/menu.json', 'r', encoding='utf-8') as f:
+        menu = json.load(f)
+    items = {}
+    for section in menu.values():
+        for item in section:
+            name = item['name'].lower()
+            price = float(item['price'].replace('PLN', '').strip())
+            items[name] = price
+    return items
+
+
+def summarize_order(cart):
+    """cart: list of item names (lowercase)"""
+    menu_items = load_menu_items()
+    summary = []
+    total = 0.0
+    for item in cart:
+        price = menu_items.get(item)
+        if price:
+            summary.append(f'- {item.title()} ({price:.2f} PLN)')
+            total += price
+        else:
+            summary.append(f'- {item.title()} (not found in menu)')
+    summary.append(f'\nTotal: {total:.2f} PLN')
+    return '\n'.join(summary)
